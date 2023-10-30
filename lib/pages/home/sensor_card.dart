@@ -4,17 +4,16 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:ndn_sensor_app/extensions.dart';
-import 'package:ndn_sensor_app/labeled_text.dart';
+import 'package:ndn_sensor_app/provided/configured_sensors.dart';
 import 'package:ndn_sensor_app/provided/sensor_data_handler.dart';
+import 'package:ndn_sensor_app/widgets/labeled_text.dart';
 import 'package:provider/provider.dart';
 
 class SensorCard extends StatefulWidget {
-  final String ndnPath;
-  final String title;
+  final SensorConfig sensor;
 
   const SensorCard({
-    required this.ndnPath,
-    required this.title,
+    required this.sensor,
     super.key,
   });
 
@@ -127,7 +126,7 @@ class _SensorCardState extends State<SensorCard> {
     var sensorDataHandler = context.read<SensorDataHandler>();
 
     return ChangeNotifierProvider.value(
-      value: sensorDataHandler.getData(widget.ndnPath),
+      value: sensorDataHandler.getData(widget.sensor.path),
       builder: (context, child) {
         return Consumer<SensorData>(
           builder: (context, value, child) {
@@ -147,11 +146,18 @@ class _SensorCardState extends State<SensorCard> {
                             SizedBox(width: 10),
                             Expanded(
                               child: LabeledText.bottom(
-                                text: "${widget.title}  -  ${value.lastItem?.roundToNPadded(2)} °C",
-                                labelText: widget.ndnPath,
+                                text: widget.sensor.title,
+                                labelText: widget.sensor.path,
                                 textStyle: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
-                                labelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: colorScheme.onSurfaceVariant.withOpacity(0.7)),
+                                labelStyle: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: colorScheme.onSurfaceVariant.withOpacity(0.7)),
                               ),
+                            ),
+                            Text(
+                              "${value.lastItem?.roundToNPadded(2)} ${widget.sensor.unit.unitString}",
+                              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
                             ),
                           ],
                         ),

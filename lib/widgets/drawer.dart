@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ndn_sensor_app/pages/home/home.dart';
+import 'package:ndn_sensor_app/pages/info/info_page.dart';
 import 'package:ndn_sensor_app/pages/sensor_settings/sensor_settings.dart';
 import 'package:ndn_sensor_app/provided/drawer_state_info.dart';
 import 'package:ndn_sensor_app/utils.dart';
@@ -29,7 +30,7 @@ class AppDrawer extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 22,
                       color: colorScheme.primary,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w800,
                     )),
               ],
             ),
@@ -50,10 +51,11 @@ class AppDrawer extends StatelessWidget {
           ),
           Spacer(),
           _DrawerItem(
-            text: "Info",
+            text: "Infos",
             activeIcon: Icons.info,
             inactiveIcon: Icons.info_outline,
             index: 99,
+            onTap: () => pushReplacement(Navigator.of(context), (context) => InfoPage()),
           ),
           SizedBox(height: 15),
         ],

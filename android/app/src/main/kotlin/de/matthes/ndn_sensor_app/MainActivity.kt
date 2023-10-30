@@ -94,6 +94,8 @@ class MainActivity : FlutterActivity() {
             } catch (e: ConnectException) {
                 result.error("NDN_NFD_CONNECTION_ERROR", "Failed to connect to NDF", null)
             } catch (e: IOException) {
+                // If you turn off the NDF app after it was working for some time, the existing face
+                // instances crashes due to a broken pipe exception and must reconnect
                 face = Face()
                 println("Reconnecting face")
                 result.error("NDN_NFD_CONNECTION_ERROR", "NDF connection reset", null)

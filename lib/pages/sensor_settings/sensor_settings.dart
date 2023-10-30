@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ndn_sensor_app/drawer.dart';
+import 'package:ndn_sensor_app/widgets/drawer.dart';
 import 'package:ndn_sensor_app/extensions.dart';
 import 'package:ndn_sensor_app/provided/configured_sensors.dart';
 import 'package:ndn_sensor_app/pages/sensor_settings/sensor_add_field.dart';
@@ -152,6 +152,8 @@ class _SensorListItemState extends State<_SensorListItem> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(sensorData.lastItem?.roundToNPadded(2) ?? "", style: TextStyle(fontSize: 14)),
+                SizedBox(width: 4),
+                Text(widget.item.unit.unitString, style: TextStyle(fontSize: 14)),
                 SizedBox(width: 15),
                 Switch(
                   value: enabled,

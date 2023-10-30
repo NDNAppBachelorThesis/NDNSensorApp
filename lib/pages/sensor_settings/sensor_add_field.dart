@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:ndn_sensor_app/extensions.dart';
 import 'package:ndn_sensor_app/provided/configured_sensors.dart';
-import 'package:ndn_sensor_app/generic_bottom_sheet.dart';
+import 'package:ndn_sensor_app/widgets/generic_bottom_sheet.dart';
 import 'package:ndn_sensor_app/provided/ndn_api_wrapper.dart';
+import 'package:ndn_sensor_app/widgets/text_checkbox.dart';
 import 'package:provider/provider.dart';
-
 
 class SensorAddButton extends StatefulWidget {
   final void Function(SensorConfig config) onSensorAdded;
@@ -43,7 +44,10 @@ class _SensorAddButtonState extends State<SensorAddButton> {
 class _AddSensorBottomSheetContent extends StatefulWidget {
   final void Function(SensorConfig config) onSensorAdded;
 
-  const _AddSensorBottomSheetContent({required this.onSensorAdded, super.key,});
+  const _AddSensorBottomSheetContent({
+    required this.onSensorAdded,
+    super.key,
+  });
 
   @override
   State<_AddSensorBottomSheetContent> createState() => _AddSensorBottomSheetContentState();
@@ -52,6 +56,8 @@ class _AddSensorBottomSheetContent extends StatefulWidget {
 class _AddSensorBottomSheetContentState extends State<_AddSensorBottomSheetContent> {
   var pathController = TextEditingController();
   var titleController = TextEditingController();
+  var unit = SensorUnit.none;
+  var allowAddingWhenConnectionFailure = false;
   String? pathError;
   String? titleError;
   bool loading = false;
@@ -73,7 +79,7 @@ class _AddSensorBottomSheetContentState extends State<_AddSensorBottomSheetConte
       newPathError = "Path must start with a /";
     } else if (configuredSensors.pathExists(path)) {
       newPathError = "The sensor is already added";
-    } else {
+    } else if (!allowAddingWhenConnectionFailure) {
       try {
         await ndnApi.getRawData(path);
       } on NDNException catch (e) {
@@ -93,7 +99,7 @@ class _AddSensorBottomSheetContentState extends State<_AddSensorBottomSheetConte
     });
 
     if (newPathError == null && newTitleError == null) {
-      widget.onSensorAdded(SensorConfig(path, title, true));
+      widget.onSensorAdded(SensorConfig(path, title, unit, true));
       pathController.clear();
       titleController.clear();
       if (context.mounted) {
@@ -111,12 +117,21 @@ class _AddSensorBottomSheetContentState extends State<_AddSensorBottomSheetConte
     Navigator.of(context).pop(false);
   }
 
+  DropdownMenuEntry<SensorUnit> _createSensorUnitDropdownEntry(SensorUnit unit, String title) {
+    return DropdownMenuEntry(
+      value: unit,
+      label: title,
+      leadingIcon: unit.icon?.toIcon(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var colorScheme = Theme.of(context).colorScheme;
     var textBtnStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.w600);
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Center(
           child: Text(
@@ -142,6 +157,27 @@ class _AddSensorBottomSheetContentState extends State<_AddSensorBottomSheetConte
             prefixIcon: Icon(Icons.text_snippet_outlined),
             errorText: titleError,
           ),
+        ),
+        SizedBox(height: 15),
+        DropdownMenu<SensorUnit>(
+          initialSelection: SensorUnit.none,
+          label: Text("Unit"),
+          leadingIcon: unit.icon?.toIcon(),
+          dropdownMenuEntries: [
+            _createSensorUnitDropdownEntry(SensorUnit.none, "None"),
+            _createSensorUnitDropdownEntry(SensorUnit.temperature, "Temperature"),
+            _createSensorUnitDropdownEntry(SensorUnit.humidity, "Humidity"),
+            _createSensorUnitDropdownEntry(SensorUnit.percent, "Percent"),
+          ],
+          onSelected: (value) => setState(() {
+            unit = value ?? SensorUnit.none;
+          }),
+        ),
+        SizedBox(height: 10),
+        TextCheckbox(
+          value: allowAddingWhenConnectionFailure,
+          onChanged: (value) => setState(() => allowAddingWhenConnectionFailure = value),
+          text: Text("Allow adding non-responding sensor", style: TextStyle(fontSize: 15)),
         ),
         SizedBox(height: 20),
         if (loading) LinearProgressIndicator(),

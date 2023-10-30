@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ndn_sensor_app/drawer.dart';
+import 'package:ndn_sensor_app/widgets/drawer.dart';
 import 'package:ndn_sensor_app/provided/configured_sensors.dart';
 import 'package:ndn_sensor_app/provided/sensor_data_handler.dart';
 import 'package:ndn_sensor_app/pages/home/sensor_card.dart';
@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
         child: ListView(
           children: [
             for (var sensor in configuredSensors.activeEndpoints)
-              SensorCard(ndnPath: sensor.path, title: sensor.title),
+              SensorCard(sensor: sensor),
           ],
         ),
       ),

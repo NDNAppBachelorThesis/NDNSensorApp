@@ -20,6 +20,11 @@ jobs:
       - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
         with:
           sdk: beta
+     
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
 
       - uses: subosito/flutter-action@v2
         with:

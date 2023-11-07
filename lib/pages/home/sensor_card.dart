@@ -30,12 +30,13 @@ class _SensorCardState extends State<SensorCard> {
     ];
     var gridColor = colorScheme.onSurface.withOpacity(0.2);
     var intervalY = 5.0;
-    var relevantHistory = history.lastNElements(15 * 3).averageNElements(3).map((e) => e.roundToN(2)).toList();
+    // var relevantHistory = history.lastNElements(15 * 3).averageNElements(3).map((e) => e.roundToN(2)).toList();
+    var relevantHistory = history.lastNElements(15).map((e) => e.roundToN(2)).toList();
     var minY = 0.0;
     var maxY = 30.0;
     if (relevantHistory.isNotEmpty) {
       minY = min((relevantHistory.reduce((a, b) => min(a, b)) / intervalY).floorToDouble() * intervalY, 0);
-      maxY = ((relevantHistory.reduce((a, b) => max(a, b)) * 1.2) / intervalY).roundToDouble() * intervalY;
+      maxY = ((relevantHistory.reduce((a, b) => max(a, b)) * 1.2) / intervalY).ceilToDouble() * intervalY;
     }
 
     return LineChartData(

@@ -1,5 +1,7 @@
 package de.matthes.ndn_sensor_app
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -18,6 +20,7 @@ import net.named_data.jndn.OnTimeout
 import java.io.IOException
 import java.lang.IndexOutOfBoundsException
 import java.net.ConnectException
+import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousCloseException
 import java.nio.charset.StandardCharsets
 
@@ -35,15 +38,14 @@ class NDNHandler : OnData, OnTimeout {
     var data: Double? = null
     var timeout = false;
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onData(interest: Interest?, data: Data) {
-        val receivedData = StandardCharsets.UTF_8.decode(data.content.buf()).toString()
+        val buffer = ByteBuffer.wrap(ByteArray(java.lang.Double.BYTES) { i -> data.content.buf()[i] }.reversedArray());
+//        val receivedData = StandardCharsets.UTF_8.decode(data.content.buf()).toString()
+        val receivedData = buffer.double;
 //        println("Got data packet with names '${data.name.toUri()}'='$receivedData'")
 
-        try {
-            this.data = receivedData.toDouble();
-        } catch (e: NumberFormatException) {
-            this.data = -1.0;
-        }
+        this.data = receivedData
 
         finished = true     // Must be last line to avoid race condition
     }

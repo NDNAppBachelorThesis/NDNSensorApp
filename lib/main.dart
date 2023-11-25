@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:ndn_sensor_app/extensions.dart';
 import 'package:ndn_sensor_app/pages/home/home.dart';
+import 'package:ndn_sensor_app/provided/app_settings.dart';
 import 'package:ndn_sensor_app/provided/configured_sensors.dart';
 import 'package:ndn_sensor_app/provided/global_app_state.dart';
 import 'package:ndn_sensor_app/provided/ndn_api_wrapper.dart';
@@ -11,16 +12,19 @@ import 'package:ndn_sensor_app/utils.dart';
 import 'package:provider/provider.dart';
 
 class StartupData {
+  final AppSettings appSettings;
   final NDNApiWrapper ndnApiWrapper;
   final ConfiguredSensors configuredSensors;
   final SensorDataHandler sensorDataHandler;
   final GlobalAppState globalAppState;
 
-  StartupData(this.ndnApiWrapper, this.configuredSensors, this.sensorDataHandler, this.globalAppState);
+  StartupData(this.appSettings, this.ndnApiWrapper, this.configuredSensors, this.sensorDataHandler, this.globalAppState);
 }
 
 Future<StartupData> _initializeApp() async {
   await FlutterDisplayMode.setHighRefreshRate();  // Enable refresh rate of > 60 fps
+  var appSettings = AppSettings();
+  await appSettings.load();
   var appState = GlobalAppState();
   var apiWrapper = NDNApiWrapper(globalAppState: appState);
   var configuredSensors = ConfiguredSensors();
@@ -31,7 +35,7 @@ Future<StartupData> _initializeApp() async {
   );
   await sensorDataHandler.startAndInitialize();
 
-  return StartupData(apiWrapper, configuredSensors, sensorDataHandler, appState);
+  return StartupData(appSettings, apiWrapper, configuredSensors, sensorDataHandler, appState);
 }
 
 class MyApp extends StatefulWidget {
@@ -69,6 +73,9 @@ class _MyAppState extends State<MyApp> {
 
           return MultiProvider(
             providers: [
+              ChangeNotifierProvider(
+                create: (context) => data.appSettings,
+              ),
               ChangeNotifierProvider(
                 create: (context) => DrawerStateInfo(),
               ),

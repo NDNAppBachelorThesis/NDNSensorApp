@@ -5,7 +5,7 @@ import 'package:ndn_sensor_app/extensions.dart';
 class InfoListItem extends StatelessWidget {
   final String text;
   final Color? textColor;
-  final String labelText;
+  final String? labelText;
   final IconData icon;
   final void Function()? onClick;
   final bool labelTop;
@@ -13,7 +13,7 @@ class InfoListItem extends StatelessWidget {
 
   const InfoListItem({
     required this.text,
-    required this.labelText,
+    this.labelText,
     required this.icon,
     this.onClick,
     this.labelTop = false,
@@ -40,11 +40,11 @@ class InfoListItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (labelTop)
-                    Text(labelText, style: textTheme.labelSmall),
+                  if (labelText != null && labelTop)
+                    Text(labelText!, style: textTheme.labelSmall),
                   Text(text, style: textTheme.bodyLarge!.copyWith(color: textColor)),
-                  if (!labelTop)
-                    Text(labelText, style: textTheme.labelSmall),
+                  if (labelText != null && !labelTop)
+                    Text(labelText!, style: textTheme.labelSmall),
                 ],
               ),
             ),

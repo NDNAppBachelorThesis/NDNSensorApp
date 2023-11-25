@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ndn_sensor_app/pages/home/home.dart';
 import 'package:ndn_sensor_app/pages/info/info_page.dart';
 import 'package:ndn_sensor_app/pages/sensor_settings/sensor_settings.dart';
+import 'package:ndn_sensor_app/pages/settings/settings_page.dart';
 import 'package:ndn_sensor_app/provided/drawer_state_info.dart';
 import 'package:ndn_sensor_app/utils.dart';
 import 'package:provider/provider.dart';
@@ -50,6 +51,13 @@ class AppDrawer extends StatelessWidget {
             onTap: () => pushReplacement(Navigator.of(context), (context) => SensorSettingsPage()),
           ),
           Spacer(),
+          _DrawerItem(
+            text: "Settings",
+            activeIcon: Icons.settings_rounded,
+            inactiveIcon: Icons.settings_outlined,
+            index: 98,
+            onTap: () => pushReplacement(Navigator.of(context), (context) => SettingsPage()),
+          ),
           _DrawerItem(
             text: "Infos",
             activeIcon: Icons.info,

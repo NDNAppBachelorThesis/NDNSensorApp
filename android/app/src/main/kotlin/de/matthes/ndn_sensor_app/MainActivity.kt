@@ -88,6 +88,10 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    private fun createFace() {
+
+    }
+
     private fun getData(call: MethodCall, result: MethodChannel.Result) {
         val handler = GetSensorDataHandler()
         val path = call.argument<String>("path")

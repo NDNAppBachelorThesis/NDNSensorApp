@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:ndn_sensor_app/pages/sensor_settings/sensor_discovery_page.dart';
+import 'package:ndn_sensor_app/provided/ndn_api_wrapper.dart';
+import 'package:ndn_sensor_app/utils.dart';
 import 'package:ndn_sensor_app/widgets/drawer.dart';
 import 'package:ndn_sensor_app/extensions.dart';
 import 'package:ndn_sensor_app/provided/configured_sensors.dart';
@@ -25,6 +28,12 @@ class _SensorSettingsPageState extends State<SensorSettingsPage> {
       appBar: AppBar(
         backgroundColor: colorScheme.inversePrimary,
         title: Text("Sensor Settings"),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 13),
+            child: IconButton(onPressed: () => push(Navigator.of(context), (context) => SensorDiscoveryPage()), icon: Icons.manage_search_outlined.toIcon(size: 33)),
+          ),
+        ],
       ),
       drawer: AppDrawer(),
       body: Padding(

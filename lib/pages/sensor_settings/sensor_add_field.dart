@@ -8,6 +8,14 @@ import 'package:ndn_sensor_app/provided/ndn_api_wrapper.dart';
 import 'package:ndn_sensor_app/widgets/text_checkbox.dart';
 import 'package:provider/provider.dart';
 
+void showSensorAddBottomSheet(BuildContext context, void Function(SensorConfig config) onSensorAdded,
+    [String? path]) async {
+  showMaterialModalBottomSheet(
+    context: context,
+    builder: (context) => _AddSensorBottomSheetContent(onSensorAdded: onSensorAdded, defaultPath: path),
+  );
+}
+
 class SensorAddButton extends StatefulWidget {
   final void Function(SensorConfig config) onSensorAdded;
 
@@ -21,19 +29,12 @@ class SensorAddButton extends StatefulWidget {
 }
 
 class _SensorAddButtonState extends State<SensorAddButton> {
-  Future<void> _openBottomSheet() async {
-    showMaterialModalBottomSheet(
-      context: context,
-      builder: (context) => _AddSensorBottomSheetContent(onSensorAdded: widget.onSensorAdded),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 60),
       child: FilledButton.icon(
-        onPressed: _openBottomSheet,
+        onPressed: () => showSensorAddBottomSheet(context, widget.onSensorAdded),
         icon: Icon(Icons.add),
         label: Text("Add new Sensor"),
       ),
@@ -43,9 +44,11 @@ class _SensorAddButtonState extends State<SensorAddButton> {
 
 class _AddSensorBottomSheetContent extends StatefulWidget {
   final void Function(SensorConfig config) onSensorAdded;
+  final String? defaultPath;
 
   const _AddSensorBottomSheetContent({
     required this.onSensorAdded,
+    this.defaultPath,
     super.key,
   });
 
@@ -61,6 +64,15 @@ class _AddSensorBottomSheetContentState extends State<_AddSensorBottomSheetConte
   String? pathError;
   String? titleError;
   bool loading = false;
+
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.defaultPath != null) {
+      pathController.text = widget.defaultPath!;
+    }
+  }
 
   Future<bool> _validateInput() async {
     setState(() => loading = true);
@@ -127,7 +139,9 @@ class _AddSensorBottomSheetContentState extends State<_AddSensorBottomSheetConte
 
   @override
   Widget build(BuildContext context) {
-    var colorScheme = Theme.of(context).colorScheme;
+    var colorScheme = Theme
+        .of(context)
+        .colorScheme;
     var textBtnStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.w600);
 
     return Column(
@@ -169,9 +183,10 @@ class _AddSensorBottomSheetContentState extends State<_AddSensorBottomSheetConte
             _createSensorUnitDropdownEntry(SensorUnit.humidity, "Humidity"),
             _createSensorUnitDropdownEntry(SensorUnit.percent, "Percent"),
           ],
-          onSelected: (value) => setState(() {
-            unit = value ?? SensorUnit.none;
-          }),
+          onSelected: (value) =>
+              setState(() {
+                unit = value ?? SensorUnit.none;
+              }),
         ),
         SizedBox(height: 10),
         TextCheckbox(

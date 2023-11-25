@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum SensorUnit {
   none(Icons.question_mark_rounded, ""),
   temperature(Icons.thermostat_rounded, "°C"),
-  humidity(Icons.water_drop_rounded, "g/m^3"),
+  humidity(Icons.water_drop_rounded, "%"),
   percent(Icons.percent_rounded, "%");
 
   final IconData? icon;

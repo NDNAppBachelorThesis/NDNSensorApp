@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/services.dart';
 import 'package:ndn_sensor_app/provided/global_app_state.dart';
 
@@ -56,13 +58,12 @@ class NDNApiWrapper {
 
   NDNApiWrapper({required this.globalAppState});
 
-  Future<double> getRawData(String path) async {
+  Future<dynamic> _methodChannelCallWrapper(String path, Future<dynamic> Function() request) async {
     try {
-      var res = await platform.invokeMethod("getData", {
-        "path": path,
-      });
+      var res = await request();
       globalAppState.resetUnsuccessfulPacketsCnt();
       return res;
+
     } on PlatformException catch (e) {
       switch (e.code) {
         case "NDN_TIMEOUT":
@@ -80,4 +81,37 @@ class NDNApiWrapper {
       throw NDNUnknownException(path, e.details);
     }
   }
+
+  Future<double> getRawData(String path) async {
+    return await _methodChannelCallWrapper(path, () async {
+      return platform.invokeMethod("getData", {
+        "path": path,
+      });
+    });
+  }
+
+  void runDiscovery(void Function(List<String> paths, bool finished) onPathsFound) async {
+    List<int> visitedIds = [];
+    int timeoutCnt = 0;
+
+    while (timeoutCnt < 3) {
+      try {
+        dynamic res = await _methodChannelCallWrapper("/esp/discovery", () async {
+          return platform.invokeMethod("runDiscovery", {
+            "visitedIds": visitedIds,
+          });
+        });
+        timeoutCnt = 0;
+        visitedIds.add(res[0]);
+        var devicePaths = (res[1] as List<Object?>).map((e) => e as String).toList(growable: false);
+        onPathsFound(devicePaths, false);
+
+      } on NDNTimeoutException {
+        timeoutCnt += 1;
+      }
+    }
+
+    onPathsFound([], true);
+  }
+
 }

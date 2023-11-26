@@ -15,21 +15,37 @@ class SensorDiscoveryPage extends StatefulWidget {
 
 class _SensorDiscoveryPageState extends State<SensorDiscoveryPage> {
   List<String> foundSensors = [];
-  bool searchRunning = true;
+  bool searchRunning = false;
+  bool disposed = false;
 
   void _runDiscovery() {
     if (searchRunning) {
       return;
     }
 
-    var ndnApi = context.read<NDNApiWrapper>();
-    foundSensors.clear();
-    ndnApi.runDiscovery((paths, finished) {
-      setState(() {
-        foundSensors.addAll(paths);
-        searchRunning = !finished;
+    try {
+      var ndnApi = context.read<NDNApiWrapper>();
+      foundSensors.clear();
+      ndnApi.runDiscovery((paths, finished) {
+        if (!disposed) {
+          setState(() {
+            foundSensors.addAll(paths);
+            searchRunning = !finished;
+          });
+        }
       });
-    });
+
+    } catch (e) {   // Ensure searchRunning get reset even on a critical exception
+      setState(() => searchRunning = false);
+      rethrow;
+    }
+  }
+
+
+  @override
+  void dispose() {
+    disposed = true;
+    super.dispose();
   }
 
   @override
@@ -62,7 +78,7 @@ class _SensorDiscoveryPageState extends State<SensorDiscoveryPage> {
                 itemBuilder: (context, index) {
                   var path = foundSensors[index];
 
-                  return _FoundSensorWidget(path: path, exists: configuredSensors.pathExists(path));
+                  return _FoundSensorWidget(path: path, exists: configuredSensors.pathExists(path), key: UniqueKey());
                 },
               ),
               SizedBox(height: 30),

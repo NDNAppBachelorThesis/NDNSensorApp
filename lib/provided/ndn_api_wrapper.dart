@@ -114,4 +114,13 @@ class NDNApiWrapper {
     onPathsFound([], true);
   }
 
+  Future<void> setFaceSettings(String ip, int port) async {
+    await _methodChannelCallWrapper("setFaceSettings", () async {
+      return await platform.invokeMethod("setFaceSettings", {
+        "ip": ip,
+        "port": port,
+      });
+    });
+  }
+
 }

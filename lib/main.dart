@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:ndn_sensor_app/extensions.dart';
 import 'package:ndn_sensor_app/pages/home/home.dart';
@@ -23,10 +24,10 @@ class StartupData {
 
 Future<StartupData> _initializeApp() async {
   await FlutterDisplayMode.setHighRefreshRate();  // Enable refresh rate of > 60 fps
-  var appSettings = AppSettings();
-  await appSettings.load();
   var appState = GlobalAppState();
   var apiWrapper = NDNApiWrapper(globalAppState: appState);
+  var appSettings = AppSettings(apiWrapper);
+  await appSettings.load();
   var configuredSensors = ConfiguredSensors();
   await configuredSensors.initialize();
   var sensorDataHandler = SensorDataHandler(
@@ -243,5 +244,10 @@ class _MainApp extends StatelessWidget {
 }
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Prevent user from entering landscape mode
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   runApp(const MyApp());
 }

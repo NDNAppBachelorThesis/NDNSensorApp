@@ -1,7 +1,5 @@
 package de.matthes.ndn_sensor_app
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.lifecycleScope
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -11,22 +9,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.named_data.jndn.Data
 import net.named_data.jndn.Face
 import net.named_data.jndn.Interest
 import net.named_data.jndn.Name
-import net.named_data.jndn.OnData
-import net.named_data.jndn.OnTimeout
 import net.named_data.jndn.encoding.Tlv0_3WireFormat
 import net.named_data.jndn.encoding.WireFormat
 import net.named_data.jndn.transport.TcpTransport
-import net.named_data.jndn.transport.UdpTransport
 import java.io.IOException
-import java.lang.IndexOutOfBoundsException
 import java.net.ConnectException
 import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousCloseException
-import java.nio.charset.StandardCharsets
 
 
 fun <R> CoroutineScope.executeAsyncTask(task: () -> R) = launch {
@@ -39,7 +31,9 @@ fun <R> CoroutineScope.executeAsyncTask(task: () -> R) = launch {
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "ndn.matthes.de/jndn"
-    private var face = Face(TcpTransport(), TcpTransport.ConnectionInfo("192.168.178.119", 6363))
+    private var face = Face()
+    private var faceIp = "";
+    private var facePort = 6363;
 
     /**
      * Executes an NDN request.
@@ -79,7 +73,7 @@ class MainActivity : FlutterActivity() {
             } catch (e: IOException) {
                 // If you turn off the NDF app after it was working for some time, the existing face
                 // instances crashes due to a broken pipe exception and must reconnect
-                face = Face(TcpTransport(), TcpTransport.ConnectionInfo("192.168.178.119", 6363))
+                updateFaceInstance()
                 println("Reconnecting face")
                 result.error("NDN_NFD_CONNECTION_ERROR", "NDF connection reset", null)
             } catch (e: Exception) {
@@ -88,8 +82,20 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun createFace() {
+    private fun updateFaceInstance() {
+        if (faceIp.isNullOrEmpty() || facePort <= 0) {
+            face = Face()
+        } else {
+            face = Face(TcpTransport(), TcpTransport.ConnectionInfo(faceIp, facePort))
+        }
+    }
 
+    private fun setFaceSettings(call: MethodCall, result: MethodChannel.Result) {
+        println("[NDN-ANDROID] Updating face settings")
+        faceIp = call.argument<String>("ip") ?: ""
+        facePort = call.argument<Int>("port") ?: 0
+        updateFaceInstance()
+        result.success(null)
     }
 
     private fun getData(call: MethodCall, result: MethodChannel.Result) {
@@ -103,6 +109,7 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun runDiscovery(call: MethodCall, result: MethodChannel.Result) {
+        println("[NDN-ANDROID] Running discovery")
         val handler = DiscoveryClientHandler()
         val visitedIds = call.argument<List<Long>>("visitedIds")
         val name = Name("/esp/discovery")
@@ -123,6 +130,7 @@ class MainActivity : FlutterActivity() {
             CHANNEL
         ).setMethodCallHandler { call, result ->
             when (call.method) {
+                "setFaceSettings" -> setFaceSettings(call, result)
                 "getData" -> getData(call, result)
                 "runDiscovery" -> runDiscovery(call, result)
                 else -> result.notImplemented();
@@ -131,4 +139,5 @@ class MainActivity : FlutterActivity() {
 
         Interest.setDefaultCanBePrefix(true)
     }
+
 }

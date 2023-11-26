@@ -33,5 +33,10 @@ jobs:
       - run: flutter --version
       - run: flutter pub get
       - run: flutter build apk
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: NDN-Sensor-App
+          path: build/app/outputs/flutter-apk/app-release.apk
       
       

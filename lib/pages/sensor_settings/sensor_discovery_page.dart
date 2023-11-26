@@ -25,7 +25,10 @@ class _SensorDiscoveryPageState extends State<SensorDiscoveryPage> {
 
     try {
       var ndnApi = context.read<NDNApiWrapper>();
-      foundSensors.clear();
+      setState(() {
+        foundSensors.clear();
+        searchRunning = true;
+      });
       ndnApi.runDiscovery((paths, finished) {
         if (!disposed) {
           setState(() {

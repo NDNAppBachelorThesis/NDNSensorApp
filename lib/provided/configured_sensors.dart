@@ -7,6 +7,7 @@ enum SensorUnit {
   none(Icons.question_mark_rounded, ""),
   temperature(Icons.thermostat_rounded, "°C"),
   humidity(Icons.water_drop_rounded, "%"),
+  absolute(Icons.toggle_off_outlined, ""),
   percent(Icons.percent_rounded, "%");
 
   final IconData? icon;

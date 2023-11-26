@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorScheme.inversePrimary,
-        title: Text("NDN Sensor App (PoC)"),
+        title: Text("NDN Sensor App"),
       ),
       drawer: AppDrawer(),
       body: Padding(

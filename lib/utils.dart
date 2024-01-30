@@ -6,15 +6,15 @@ import 'package:ndn_sensor_app/provided/configured_sensors.dart';
 import 'package:ndn_sensor_app/provided/global_app_state.dart';
 import 'package:provider/provider.dart';
 
-/// Adds a NDF connection error wrapper around pages
-class NDFConnectionErrorPageWrapper extends StatelessWidget {
-  Widget child;
+/// Adds a NFD connection error wrapper around pages
+class NFDConnectionErrorPageWrapper extends StatelessWidget {
+  final Widget child;
 
-  NDFConnectionErrorPageWrapper({required this.child, super.key});
+  const NFDConnectionErrorPageWrapper({required this.child, super.key});
 
   Future<void> _showNDFConnectionError(BuildContext context, GlobalAppState appState) async {
     var configuredSensors = Provider.of<ConfiguredSensors>(context, listen: false);
-    // Use min to prevent the limit from becoming 0
+    // Use max to prevent the limit from becoming 0
     var unsuccessfulPacketsLimit = max(configuredSensors.activeEndpoints.length * 4, 1);
     if (appState.showedNDFConnectionError || appState.unsuccessfulPacketsCnt < unsuccessfulPacketsLimit) {
       return;
@@ -68,7 +68,7 @@ Future<Object?> pushReplacement(
   Widget Function(BuildContext context) builder,
 ) async {
   return navigator.pushReplacement(MaterialPageRoute(
-    builder: (context) => NDFConnectionErrorPageWrapper(child: builder(context)),
+    builder: (context) => NFDConnectionErrorPageWrapper(child: builder(context)),
   ));
 }
 
@@ -77,6 +77,6 @@ Future<Object?> push(
   Widget Function(BuildContext context) builder,
 ) async {
   return navigator.push(MaterialPageRoute(
-    builder: (context) => NDFConnectionErrorPageWrapper(child: builder(context)),
+    builder: (context) => NFDConnectionErrorPageWrapper(child: builder(context)),
   ));
 }

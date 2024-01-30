@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ndn_sensor_app/pages/debug_page.dart';
 import 'package:ndn_sensor_app/pages/home/home.dart';
 import 'package:ndn_sensor_app/pages/info/info_page.dart';
+import 'package:ndn_sensor_app/pages/link_quality/LinkQualityPage.dart';
 import 'package:ndn_sensor_app/pages/sensor_settings/sensor_settings.dart';
 import 'package:ndn_sensor_app/pages/settings/settings_page.dart';
 import 'package:ndn_sensor_app/provided/drawer_state_info.dart';
@@ -50,7 +53,22 @@ class AppDrawer extends StatelessWidget {
             index: 1,
             onTap: () => pushReplacement(Navigator.of(context), (context) => SensorSettingsPage()),
           ),
+          _DrawerItem(
+            text: "Link Quality",
+            activeIcon: Icons.auto_graph,
+            inactiveIcon: Icons.auto_graph_outlined,
+            index: 2,
+            onTap: () => pushReplacement(Navigator.of(context), (context) => LinkQualityPage()),
+          ),
           Spacer(),
+          if (kDebugMode)
+            _DrawerItem(
+              text: "Debug",
+              activeIcon: Icons.bug_report,
+              inactiveIcon: Icons.bug_report_outlined,
+              index: 10000,
+              onTap: () => pushReplacement(Navigator.of(context), (context) => DebugPage()),
+            ),
           _DrawerItem(
             text: "Settings",
             activeIcon: Icons.settings_rounded,

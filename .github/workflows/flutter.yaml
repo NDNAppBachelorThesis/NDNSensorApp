@@ -38,5 +38,6 @@ jobs:
         with:
           name: NDN-Sensor-App
           path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
       
       

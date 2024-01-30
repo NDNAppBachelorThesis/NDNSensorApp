@@ -1,4 +1,10 @@
-# ndn_sensor_app
+# NDNSensorApp
+
+
+## Mirror
+If you are viewing this from a mirror then please visit `https://github.com/NDNAppBachelorThesis/NDNSensorApp` to
+access the build artifacts
+
 
 ## Get NDN to run on Windows
 1. Install NDN Forwarder https://github.com/named-data/NFD

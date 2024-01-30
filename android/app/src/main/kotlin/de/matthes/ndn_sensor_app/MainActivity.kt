@@ -83,10 +83,10 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun updateFaceInstance() {
-        if (faceIp.isNullOrEmpty() || facePort <= 0) {
-            face = Face()
+        face = if (faceIp.isEmpty() || facePort <= 0) {
+            Face()
         } else {
-            face = Face(TcpTransport(), TcpTransport.ConnectionInfo(faceIp, facePort))
+            Face(TcpTransport(), TcpTransport.ConnectionInfo(faceIp, facePort))
         }
     }
 

@@ -238,7 +238,7 @@ class _MainApp extends StatelessWidget {
           ),
         )),
       ),
-      home: NDFConnectionErrorPageWrapper(child: HomePage()),
+      home: NFDConnectionErrorPageWrapper(child: HomePage()),
     );
   }
 }

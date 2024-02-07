@@ -29,7 +29,7 @@ class _SensorDiscoveryPageState extends State<SensorDiscoveryPage> {
         foundSensors.clear();
         searchRunning = true;
       });
-      ndnApi.runDiscovery((paths, finished) {
+      ndnApi.runNameDiscovery((paths, finished) {
         if (!disposed) {
           setState(() {
             foundSensors.addAll(paths);

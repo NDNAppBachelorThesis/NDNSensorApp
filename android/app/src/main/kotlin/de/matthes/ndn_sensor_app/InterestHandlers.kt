@@ -26,6 +26,10 @@ abstract class InterestHandler : OnData, OnTimeout {
         return ByteBuffer.wrap(getDataAsByteArray(data).reversedArray()).double;
     }
 
+    protected fun getDataAsFloat(data: Data): Float {
+        return ByteBuffer.wrap(getDataAsByteArray(data).reversedArray()).getFloat();
+    }
+
     /**
      * Converts the data to a ByteArray
      */
@@ -78,6 +82,15 @@ class DiscoveryClientHandler : BasicInterestHandler() {
         responseId = data.name[-1].toEscapedString().toLongOrNull()
         responsePaths.addAll(paths)
 
+        setDone()
+    }
+}
+
+class LinkQualityHandler : BasicInterestHandler() {
+    var linkQuality: Float? = null
+
+    override fun onData(interest: Interest, data: Data) {
+        this.linkQuality = getDataAsFloat(data)
         setDone()
     }
 }

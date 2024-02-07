@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:ndn_sensor_app/provided/ndn_api_wrapper.dart';
 import 'package:ndn_sensor_app/widgets/drawer.dart';
-import 'package:zoom_widget/zoom_widget.dart';
+import 'package:provider/provider.dart';
 
 class DebugPage extends StatefulWidget {
   const DebugPage({super.key});
@@ -36,10 +37,25 @@ class _DebugWidget extends StatefulWidget {
 }
 
 class _DebugWidgetState extends State<_DebugWidget> {
+  late final Future<double?> future;
+
+  @override
+  void initState() {
+    super.initState();
+    future = context.read<NDNApiWrapper>().getSensorLinkQuality("233585120353436");
+  }
+
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Text("Loading...");
+        }
 
-    return Placeholder();
+        return Text("Data: ${snapshot.data}");
+      },
+    );
   }
 }
-

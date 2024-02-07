@@ -63,7 +63,6 @@ class NDNApiWrapper {
       var res = await request();
       globalAppState.resetUnsuccessfulPacketsCnt();
       return res;
-
     } on PlatformException catch (e) {
       switch (e.code) {
         case "NDN_TIMEOUT":
@@ -90,7 +89,7 @@ class NDNApiWrapper {
     });
   }
 
-  void runDiscovery(void Function(List<String> paths, bool finished) onPathsFound) async {
+  void runNameDiscovery(void Function(List<String> paths, bool finished) onPathsFound) async {
     List<int> visitedIds = [];
     int timeoutCnt = 0;
 
@@ -105,7 +104,6 @@ class NDNApiWrapper {
         visitedIds.add(res[0]);
         var devicePaths = (res[1] as List<Object?>).map((e) => e as String).toList(growable: false);
         onPathsFound(devicePaths, false);
-
       } on NDNTimeoutException {
         timeoutCnt += 1;
       }
@@ -114,11 +112,41 @@ class NDNApiWrapper {
     onPathsFound([], true);
   }
 
+  void runDeviceDiscovery(void Function(String? deviceId, bool finished) onDeviceFound) async {
+    List<int> visitedIds = [];
+    int timeoutCnt = 0;
+
+    while (timeoutCnt < 3) {
+      try {
+        dynamic res = await _methodChannelCallWrapper("/esp/discovery", () async {
+          return platform.invokeMethod("runDiscovery", {
+            "visitedIds": visitedIds,
+          });
+        });
+        timeoutCnt = 0;
+        visitedIds.add(res[0]);
+        onDeviceFound(res[0].toString(), false);
+      } on NDNTimeoutException {
+        timeoutCnt += 1;
+      }
+    }
+
+    onDeviceFound(null, true);
+  }
+
   Future<void> setFaceSettings(String ip, int port) async {
     await _methodChannelCallWrapper("setFaceSettings", () async {
       return await platform.invokeMethod("setFaceSettings", {
         "ip": ip,
         "port": port,
+      });
+    });
+  }
+
+  Future<double?> getSensorLinkQuality(String deviceId) async {
+    return await _methodChannelCallWrapper("/esp/$deviceId/linkquality", () async {
+      return platform.invokeMethod("getLinkQuality", {
+        "deviceId": deviceId,
       });
     });
   }

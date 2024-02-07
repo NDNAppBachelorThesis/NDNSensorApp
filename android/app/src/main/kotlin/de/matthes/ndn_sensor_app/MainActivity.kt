@@ -110,8 +110,8 @@ class MainActivity : FlutterActivity() {
 
     private fun runDiscovery(call: MethodCall, result: MethodChannel.Result) {
         println("[NDN-ANDROID] Running discovery")
-        val handler = DiscoveryClientHandler()
         val visitedIds = call.argument<List<Long>>("visitedIds")
+        val handler = DiscoveryClientHandler()
         val name = Name("/esp/discovery")
         visitedIds?.forEach {
             name.append(ByteBuffer.wrap(ByteArray(8)).putLong(it).array().reversedArray())
@@ -119,6 +119,17 @@ class MainActivity : FlutterActivity() {
 
         executeNDNCall(handler, name, result, timeout = 1000.0) {
             result.success(listOf( handler.responseId, handler.responsePaths));
+        }
+    }
+
+    private fun getLinkQuality(call: MethodCall, result: MethodChannel.Result) {
+        println("[NDN-ANDROID] Getting Link Quality")
+        val deviceId = call.argument<String>("deviceId")
+        val handler = LinkQualityHandler()
+        val name = Name("/esp/$deviceId/linkquality")
+
+        executeNDNCall(handler, name, result, timeout = 1000.0) {
+            result.success(handler.linkQuality)
         }
     }
 
@@ -133,6 +144,7 @@ class MainActivity : FlutterActivity() {
                 "setFaceSettings" -> setFaceSettings(call, result)
                 "getData" -> getData(call, result)
                 "runDiscovery" -> runDiscovery(call, result)
+                "getLinkQuality" -> getLinkQuality(call, result)
                 else -> result.notImplemented();
             }
         }

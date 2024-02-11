@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
@@ -11,6 +14,9 @@ import 'package:ndn_sensor_app/provided/drawer_state_info.dart';
 import 'package:ndn_sensor_app/provided/sensor_data_handler.dart';
 import 'package:ndn_sensor_app/utils.dart';
 import 'package:provider/provider.dart';
+import 'package:logging/logging.dart';
+// import 'package:logging_to_logcat/logging_to_logcat.dart';
+
 
 class StartupData {
   final AppSettings appSettings;
@@ -249,5 +255,22 @@ void main() {
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
+
+  FlutterError.onError = (details) {
+    print("-----  Flutter exception  -----");
+    print(details.toString());
+    print("-----  ---------------  -----");
+  };
+
+  PlatformDispatcher.instance.onError = (exception, stackTrace) {
+    print("-----  Platform exception  -----");
+    print(exception.toString());
+    print(stackTrace.toString());
+    print("-----  ---------------  -----");
+    return true;
+  };
+
+  log("App starting...", level: 0);
+  log("App starting...", level: 2000);
   runApp(const MyApp());
 }

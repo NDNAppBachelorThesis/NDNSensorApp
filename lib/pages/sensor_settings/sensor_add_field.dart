@@ -183,6 +183,7 @@ class _AddSensorBottomSheetContentState extends State<_AddSensorBottomSheetConte
             _createSensorUnitDropdownEntry(SensorUnit.humidity, "Humidity"),
             _createSensorUnitDropdownEntry(SensorUnit.percent, "Percent"),
             _createSensorUnitDropdownEntry(SensorUnit.absolute, "Absolute"),
+            _createSensorUnitDropdownEntry(SensorUnit.centiMeters, "Centimeter"),
           ],
           onSelected: (value) =>
               setState(() {

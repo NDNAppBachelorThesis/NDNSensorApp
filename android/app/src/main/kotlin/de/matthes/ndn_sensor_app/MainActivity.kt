@@ -69,12 +69,20 @@ class MainActivity : FlutterActivity() {
             } catch (e: AsynchronousCloseException) {
                 result.error("NDN_ASYNC_CLOSE", "Async close error", null)
             } catch (e: ConnectException) {
+                println("ConnectException:")
+                println(e.message)
+                println(e.stackTrace.joinToString("\n"))
+                println("---------------")
                 result.error("NDN_NFD_CONNECTION_ERROR", "Failed to connect to NDF", null)
             } catch (e: IOException) {
                 // If you turn off the NDF app after it was working for some time, the existing face
                 // instances crashes due to a broken pipe exception and must reconnect
                 updateFaceInstance()
                 println("Reconnecting face")
+                println("Re-ConnectException:")
+                println(e.message)
+                println(e.stackTrace.joinToString("\n"))
+                println("---------------")
                 result.error("NDN_NFD_CONNECTION_ERROR", "NDF connection reset", null)
             } catch (e: Exception) {
                 result.error("NDN_UNKNOWN_EXCEPTION", "Unknown exception", e)

@@ -125,7 +125,7 @@ class _FoundSensorWidgetState extends State<_FoundSensorWidget> {
     var configuredSensors = Provider.of<ConfiguredSensors>(context, listen: false);
     showSensorAddBottomSheet(context, (config) {
       configuredSensors.addEndpoint(config);
-      setState(() => exists = true);
+      // setState(() => exists = true);
     }, widget.path);
   }
 

@@ -42,7 +42,8 @@ class _DebugWidgetState extends State<_DebugWidget> {
   @override
   void initState() {
     super.initState();
-    future = context.read<NDNApiWrapper>().getSensorLinkQualities("198328652539720");
+    // 198328652539720
+    future = context.read<NDNApiWrapper>().getSensorLinkQualities("123");
   }
 
   @override

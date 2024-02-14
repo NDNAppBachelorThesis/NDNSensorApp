@@ -22,23 +22,28 @@ abstract class InterestHandler : OnData, OnTimeout {
         abort();
     }
 
-    protected fun getDataAsDouble(data: Data): Double {
-        return ByteBuffer.wrap(getDataAsByteArray(data).reversedArray()).double;
-    }
-
-    protected fun getDataAsFloat(data: Data): Float {
-        return ByteBuffer.wrap(getDataAsByteArray(data).reversedArray()).getFloat();
-    }
-
-    /**
-     * Converts the data to a ByteArray
-     */
-    protected fun getDataAsByteArray(data: Data): ByteArray {
+    protected fun dataToByteArray(data: Data, length: Int, offset: Int): ByteArray {
         if (data.content.buf() == null) {
             return ByteArray(0)
         }
 
-        return ByteArray(data.content.size()) { i -> data.content.buf()[i] }
+        if (length + offset > data.content.size()) {
+            throw RuntimeException("Requested data too large. Size=${data.content.size()}");
+        }
+
+        return ByteArray(length) { data.content.buf()[it + offset] }
+    }
+
+    protected fun bytesToLong(byteArray: ByteArray): Long {
+        return ByteBuffer.wrap(byteArray.reversedArray()).getLong()
+    }
+
+    protected fun bytesToFloat(byteArray: ByteArray): Float {
+        return ByteBuffer.wrap(byteArray.reversedArray()).getFloat()
+    }
+
+    protected fun bytesToDouble(byteArray: ByteArray): Double {
+        return ByteBuffer.wrap(byteArray.reversedArray()).getDouble()
     }
 
 }
@@ -63,7 +68,7 @@ class GetSensorDataHandler : BasicInterestHandler() {
     var data: Double? = null
 
     override fun onData(interest: Interest, data: Data) {
-        this.data = getDataAsDouble(data)
+        this.data = bytesToDouble(dataToByteArray(data, 8, 0))
         setDone()
     }
 }
@@ -71,26 +76,39 @@ class GetSensorDataHandler : BasicInterestHandler() {
 class DiscoveryClientHandler : BasicInterestHandler() {
     var responseId: Long? = null
     var responsePaths = mutableListOf<String>()
+    var isNFD = false
 
     override fun onData(interest: Interest, data: Data) {
         println("Got data packet with name ${data.name.toUri()}")
-        val paths = String(getDataAsByteArray(data))
-            .split('\u0000')
-            .filter { it.isNotEmpty() }    // Separated by 0-Byte
-        println("Paths: ${paths}")
 
-        responseId = data.name[-1].toEscapedString().toLongOrNull()
-        responsePaths.addAll(paths)
+        if (data.name.size() >= 4 && data.name[-1].toEscapedString() == "1") {
+            println(" -> Is NFD");
+            isNFD = true
+        } else {
+            val paths = String(dataToByteArray(data, data.content.size(), 0))
+                .split('\u0000')
+                .filter { it.isNotEmpty() }    // Separated by 0-Byte
+            println("Paths: $paths")
+            responsePaths.addAll(paths)
+        }
+
+        responseId = data.name[-2].toEscapedString().toLongOrNull()
 
         setDone()
     }
 }
 
 class LinkQualityHandler : BasicInterestHandler() {
-    var linkQuality: Float? = null
+    val qualities: MutableMap<Long, Float> = mutableMapOf()
 
     override fun onData(interest: Interest, data: Data) {
-        this.linkQuality = getDataAsFloat(data)
+        for (i in 0..<data.content.size() / 12) {
+            val id = bytesToLong(dataToByteArray(data, 8, 12 * i + 0))
+            val quality = bytesToFloat(dataToByteArray(data, 4, 12 * i + 8));
+
+            qualities[id] = quality
+        }
         setDone()
     }
+
 }

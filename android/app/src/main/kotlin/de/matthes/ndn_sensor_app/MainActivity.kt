@@ -126,7 +126,7 @@ class MainActivity : FlutterActivity() {
         }
 
         executeNDNCall(handler, name, result, timeout = 1000.0) {
-            result.success(listOf( handler.responseId, handler.responsePaths));
+            result.success(listOf( handler.responseId, handler.responsePaths, handler.isNFD));
         }
     }
 
@@ -137,7 +137,7 @@ class MainActivity : FlutterActivity() {
         val name = Name("/esp/$deviceId/linkquality")
 
         executeNDNCall(handler, name, result, timeout = 1000.0) {
-            result.success(handler.linkQuality)
+            result.success(handler.qualities.toMap())
         }
     }
 

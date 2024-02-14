@@ -89,7 +89,7 @@ class NDNApiWrapper {
     });
   }
 
-  void runNameDiscovery(void Function(List<String> paths, bool finished) onPathsFound) async {
+  void runNameDiscovery(void Function(List<String> paths, int? deviceId, bool? isNFD, bool finished) onPathsFound) async {
     List<int> visitedIds = [];
     int timeoutCnt = 0;
 
@@ -101,18 +101,21 @@ class NDNApiWrapper {
           });
         });
         timeoutCnt = 0;
-        visitedIds.add(res[0]);
+        var deviceId = res[0] as int;
         var devicePaths = (res[1] as List<Object?>).map((e) => e as String).toList(growable: false);
-        onPathsFound(devicePaths, false);
+        var isNfd = res[2] as bool;
+
+        visitedIds.add(deviceId);
+        onPathsFound(devicePaths, deviceId, isNfd, false);
       } on NDNTimeoutException {
         timeoutCnt += 1;
       }
     }
 
-    onPathsFound([], true);
+    onPathsFound([], null, null, true);
   }
 
-  void runDeviceDiscovery(void Function(String? deviceId, bool finished) onDeviceFound) async {
+  void runDeviceDiscovery(void Function(String? deviceId, bool? isNfd, bool finished) onDeviceFound) async {
     List<int> visitedIds = [];
     int timeoutCnt = 0;
 
@@ -124,14 +127,17 @@ class NDNApiWrapper {
           });
         });
         timeoutCnt = 0;
-        visitedIds.add(res[0]);
-        onDeviceFound(res[0].toString(), false);
+        var deviceId = res[0] as int;
+        var isNfd = res[2] as bool;
+
+        visitedIds.add(deviceId);
+        onDeviceFound(deviceId.toString(), isNfd, false);
       } on NDNTimeoutException {
         timeoutCnt += 1;
       }
     }
 
-    onDeviceFound(null, true);
+    onDeviceFound(null, null, true);
   }
 
   Future<void> setFaceSettings(String ip, int port) async {
@@ -143,12 +149,14 @@ class NDNApiWrapper {
     });
   }
 
-  Future<double?> getSensorLinkQuality(String deviceId) async {
-    return await _methodChannelCallWrapper("/esp/$deviceId/linkquality", () async {
+  Future<Map<int, double>> getSensorLinkQualities(String deviceId) async {
+    var r = await _methodChannelCallWrapper("/esp/$deviceId/linkquality", () async {
       return platform.invokeMethod("getLinkQuality", {
         "deviceId": deviceId,
       });
     });
+
+    return (r as Map).map((key, value) => MapEntry(key as int, value as double));
   }
 
 }

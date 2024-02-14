@@ -20,7 +20,7 @@ class _LinkQualityPageState extends State<LinkQualityPage> {
   void initState() {
     super.initState();
     List<String> idCache = [];
-    context.read<NDNApiWrapper>().runDeviceDiscovery((deviceId, finished) {
+    context.read<NDNApiWrapper>().runDeviceDiscovery((deviceId, isNFD, finished) {
       if (!finished) {
         idCache.add(deviceId!);
       } else {
@@ -216,7 +216,7 @@ class _MarkerState extends State<_Marker> {
   @override
   void initState() {
     super.initState();
-    context.read<NDNApiWrapper>().getSensorLinkQuality(widget.data.sensorId)
+    context.read<NDNApiWrapper>().getSensorLinkQualities(widget.data.sensorId)
         .then((value) => setState(() => quality = "$value%"))
         .onError((error, stackTrace) => setState(() => quality = "Error"));
   }

@@ -270,7 +270,5 @@ void main() {
     return true;
   };
 
-  log("App starting...", level: 0);
-  log("App starting...", level: 2000);
   runApp(const MyApp());
 }

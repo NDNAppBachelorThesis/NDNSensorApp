@@ -37,12 +37,12 @@ class _DebugWidget extends StatefulWidget {
 }
 
 class _DebugWidgetState extends State<_DebugWidget> {
-  late final Future<double?> future;
+  late final Future<Map<int, double>> future;
 
   @override
   void initState() {
     super.initState();
-    future = context.read<NDNApiWrapper>().getSensorLinkQuality("233585120353436");
+    future = context.read<NDNApiWrapper>().getSensorLinkQualities("198328652539720");
   }
 
   @override
@@ -52,6 +52,10 @@ class _DebugWidgetState extends State<_DebugWidget> {
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return Text("Loading...");
+        }
+
+        if (snapshot.hasError) {
+          return Text("Error: ${snapshot.error}");
         }
 
         return Text("Data: ${snapshot.data}");

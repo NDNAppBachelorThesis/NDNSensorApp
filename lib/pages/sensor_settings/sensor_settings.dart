@@ -10,6 +10,8 @@ import 'package:ndn_sensor_app/pages/sensor_settings/sensor_add_field.dart';
 import 'package:ndn_sensor_app/provided/sensor_data_handler.dart';
 import 'package:provider/provider.dart';
 
+///
+/// Configure the available sensors
 class SensorSettingsPage extends StatefulWidget {
   const SensorSettingsPage({super.key});
 
@@ -62,6 +64,8 @@ class _SensorSettingsPageState extends State<SensorSettingsPage> {
   }
 }
 
+///
+/// Displays a single sensor in a list
 class _SensorListItem extends StatefulWidget {
   final SensorConfig item;
 

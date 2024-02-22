@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Helper method to show generic bottom sheets
 Future<T?> showMaterialModalBottomSheet<T>({
   required BuildContext context,
   required Widget Function(BuildContext context) builder,

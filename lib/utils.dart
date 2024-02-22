@@ -6,7 +6,7 @@ import 'package:ndn_sensor_app/provided/configured_sensors.dart';
 import 'package:ndn_sensor_app/provided/global_app_state.dart';
 import 'package:provider/provider.dart';
 
-/// Adds a NFD connection error wrapper around pages
+/// This is a wrapper widget, which will show a dialog if the NFD connection is faulty
 class NFDConnectionErrorPageWrapper extends StatelessWidget {
   final Widget child;
 
@@ -63,6 +63,7 @@ class NFDConnectionErrorPageWrapper extends StatelessWidget {
   }
 }
 
+/// Replaces the current widget on the navigator stack. Ensures that the NFDConnectionErrorPageWrapper is injected.
 Future<Object?> pushReplacement(
   NavigatorState navigator,
   Widget Function(BuildContext context) builder,
@@ -72,6 +73,7 @@ Future<Object?> pushReplacement(
   ));
 }
 
+/// Adds a new widget to the navigator stack. Ensures that the NFDConnectionErrorPageWrapper is injected.
 Future<Object?> push(
   NavigatorState navigator,
   Widget Function(BuildContext context) builder,

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
@@ -9,6 +8,8 @@ import 'package:ndn_sensor_app/provided/sensor_data_handler.dart';
 import 'package:ndn_sensor_app/widgets/labeled_text.dart';
 import 'package:provider/provider.dart';
 
+///
+/// Shows a measurement graph for a single sensor
 class SensorCard extends StatefulWidget {
   final SensorConfig sensor;
 
@@ -22,6 +23,10 @@ class SensorCard extends StatefulWidget {
 }
 
 class _SensorCardState extends State<SensorCard> {
+
+  /// Returns the data required for the chart library.
+  /// Only displays the last 15 measurements.
+  /// This function dynamically adjusts the range and steps of the Y axis
   LineChartData chartData(List<double> history) {
     var colorScheme = Theme.of(context).colorScheme;
     var gradientColors = [
@@ -29,7 +34,6 @@ class _SensorCardState extends State<SensorCard> {
       colorScheme.primary,
     ];
     var gridColor = colorScheme.onSurface.withOpacity(0.2);
-    // var relevantHistory = history.lastNElements(15 * 3).averageNElements(3).map((e) => e.roundToN(2)).toList();
     var relevantHistory = history.lastNElements(15).map((e) => e.roundToN(2)).toList();
     var intervalY = 5.0;
     if (relevantHistory.isNotEmpty) {
@@ -129,6 +133,7 @@ class _SensorCardState extends State<SensorCard> {
     var colorScheme = Theme.of(context).colorScheme;
     var sensorDataHandler = context.read<SensorDataHandler>();
 
+    // ChangeNotifier to react to new measurement values
     return ChangeNotifierProvider.value(
       value: sensorDataHandler.getData(widget.sensor.path),
       builder: (context, child) {

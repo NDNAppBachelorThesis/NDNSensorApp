@@ -5,6 +5,20 @@ import 'package:ndn_sensor_app/widgets/drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:zoom_widget/zoom_widget.dart';
 
+///
+/// For now this is there the positions of the ESP32 boards are configured
+const devicePositionLookup = {
+  // NFDs
+  "123": (0.18922539658771828, 0.49491724484244753),
+  // Devices
+  "198328652539720": (0.8706381641558737, 0.4158521646138516),  // Board 8
+  "233585120353436": (0.6089442026508508, 0.9095065773387448),  // Board 2
+  "251117176855708": (0.6259425888792238, 0.1940290478752015),  // Board 4
+  "92843337030812": (0.8399677245826812, 0.8755098048804338),   // Board 1
+};
+
+///
+/// The overall link quality page. Transitions between loading and display state
 class LinkQualityPage extends StatefulWidget {
   const LinkQualityPage({super.key});
 
@@ -15,6 +29,11 @@ class LinkQualityPage extends StatefulWidget {
 class _LinkQualityPageState extends State<LinkQualityPage> {
   late final Future<Map<String, DeviceInfo>> future;
 
+  ///
+  /// Loads the link quality in three steps.
+  ///  1. Run the discovery to find all available sensors.
+  ///  2. For each sensor request their link quality data
+  ///  3. Connect the link qualities from different devices to obtain the quality for both directions
   Future<Map<String, DeviceInfo>> loadData(NDNApiWrapper apiWrapper) async {
     bool doRun = true;
     List<DeviceInfo> resultCache = [];
@@ -88,6 +107,8 @@ class _LinkQualityPageState extends State<LinkQualityPage> {
   }
 }
 
+///
+/// The loading widget
 class _Loading extends StatelessWidget {
   const _Loading({super.key});
 
@@ -115,6 +136,8 @@ class _LinkQuality extends StatefulWidget {
   State<_LinkQuality> createState() => _LinkQualityState();
 }
 
+///
+/// The widget to display when all data is loaded
 class _LinkQualityState extends State<_LinkQuality> {
   var zoomKey = GlobalKey();
   Offset? lastTapPosition;
@@ -122,6 +145,8 @@ class _LinkQualityState extends State<_LinkQuality> {
   @override
   void initState() {
     super.initState();
+    // Image width is only available after the initial build. It is required to calculate where the markers / lines
+    // should be drawn
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       setState(() {
         injectMarkerPositions();
@@ -129,19 +154,9 @@ class _LinkQualityState extends State<_LinkQuality> {
     });
   }
 
+  ///
+  /// For all found device this method calculates and sets the position on the room plan image
   void injectMarkerPositions() {
-    var lookup = {
-      // NFDs
-      "123": (0.18922539658771828, 0.49491724484244753),
-      // Devices
-      "198328652539720": (0.8706381641558737, 0.4158521646138516),
-      "233585120353436": (0.6305785123962663, 0.7951537972516991),
-      // "159348532864940": (0.8429355270415819, 0.7615024862619101),
-      // "92843337030812": (0.6705678640697553, 0.7934779904469904),
-      // "8794131624": (0.742915378368151, 0.9264777441759959),
-      // "3164613112": (0.8302219651718544, 0.921854030855141),
-    };
-
     var imageSize = _getImageSize();
     if (imageSize == null) {
       return;
@@ -151,7 +166,7 @@ class _LinkQualityState extends State<_LinkQuality> {
     var imgY = imageSize.height;
 
     widget.availableDevices.forEach((deviceId, deviceInfo) {
-      var position = lookup[deviceId];
+      var position = devicePositionLookup[deviceId];
       if (position == null) {
         return;
       }
@@ -161,6 +176,8 @@ class _LinkQualityState extends State<_LinkQuality> {
     });
   }
 
+  ///
+  /// Returns the image of the room plan widget
   Size? _getImageSize() {
     final keyContext = zoomKey.currentContext;
     if (keyContext == null) {
@@ -171,6 +188,9 @@ class _LinkQualityState extends State<_LinkQuality> {
     return box.size;
   }
 
+  ///
+  /// Tap position is only available on tapDown, not in onTap. So I always store the latest tapped position in tapDown
+  /// to read it later in onTap.
   void _handleTapDown(TapDownDetails details) {
     final widgetSize = _getImageSize();
     if (widgetSize == null) {
@@ -184,6 +204,8 @@ class _LinkQualityState extends State<_LinkQuality> {
     lastTapPosition = relativePosition;
   }
 
+  ///
+  /// Handles a tap on the map. Uses the tap position from the _handleTapDown() method.
   void _handleTap() {
     if (lastTapPosition == null) {
       return;
@@ -198,6 +220,8 @@ class _LinkQualityState extends State<_LinkQuality> {
     print("Add marker at $dx, $dy");
   }
 
+  ///
+  /// Creates the link lines, which must be drawn between individual nodes
   List<LinkLineInfo> _calculateLinkLines() {
     List<LinkLineInfo> res = [];
     var devices = widget.availableDevices;
@@ -282,28 +306,23 @@ class _LinkQualityState extends State<_LinkQuality> {
   }
 }
 
-class _Marker extends StatefulWidget {
+class _Marker extends StatelessWidget {
   final DeviceInfo data;
 
   const _Marker({required this.data, super.key});
 
   @override
-  State<_Marker> createState() => _MarkerState();
-}
-
-class _MarkerState extends State<_Marker> {
-  @override
   Widget build(BuildContext context) {
     const scaling = 2.0;
-    var imageName = widget.data.isNFD ? "nfd_pin.png" : "sensor_pin.png";
+    var imageName = data.isNFD ? "nfd_pin.png" : "sensor_pin.png";
 
-    var textSuffix = widget.data.isNFD ? "\n(NFD Server)" : "";
+    var textSuffix = data.isNFD ? "\n(NFD Server)" : "";
 
     return Positioned(
-      left: widget.data.x - (256 / scaling / 2),
-      top: widget.data.y - (256 / scaling),
+      left: data.x - (256 / scaling / 2),
+      top: data.y - (256 / scaling),
       child: Tooltip(
-        message: "ID: ${widget.data.id}$textSuffix",
+        message: "ID: ${data.id}$textSuffix",
         textStyle: TextStyle(fontSize: 16, color: Colors.white),
         triggerMode: TooltipTriggerMode.tap,
         verticalOffset: -(128 / scaling),
@@ -333,9 +352,9 @@ class _LinkLineText extends StatelessWidget {
   const _LinkLineText(this.lineInfo, {super.key});
 
   Size _textSize(String text, TextStyle style) {
-    final TextPainter textPainter = TextPainter(
-        text: TextSpan(text: text, style: style), maxLines: 1, textDirection: TextDirection.ltr)
-      ..layout(minWidth: 0, maxWidth: double.infinity);
+    final TextPainter textPainter =
+        TextPainter(text: TextSpan(text: text, style: style), maxLines: 1, textDirection: TextDirection.ltr)
+          ..layout(minWidth: 0, maxWidth: double.infinity);
     return textPainter.size;
   }
 
@@ -348,16 +367,18 @@ class _LinkLineText extends StatelessWidget {
     var fromText = (lineInfo.fromQuality * 100).toStringAsFixed(2);
     var toText = (lineInfo.toQuality * 100).toStringAsFixed(2);
 
-    var fromArrow = "-->";
-    var toArrow = "<--";
+    var fromArrow = "→";
+    var toArrow = "←";
 
     if (lineInfo.from.x > lineInfo.to.x) {
-      fromArrow = "<--";
-      toArrow = "-->";
+      fromArrow = "←";
+      toArrow = "→";
     }
 
-    var labelText = "$fromText% $fromArrow\n$toText% $toArrow";
-    var labelTextStyle = TextStyle(fontSize: 40);
+    var fromTextPercent = "$fromText%";
+    var toTextPercent = "$toText%";
+    var labelText = "${fromTextPercent.padRight(7)} $fromArrow\n${toTextPercent.padRight(7)} $toArrow";
+    var labelTextStyle = TextStyle(fontSize: 20);
     var textSize = _textSize(labelText, labelTextStyle);
 
     return Positioned(
@@ -366,7 +387,8 @@ class _LinkLineText extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Color(0xFFF6F6F6),
-          border: Border.all()
+          border: Border.all(color: Colors.black54, width: 3),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
@@ -377,6 +399,10 @@ class _LinkLineText extends StatelessWidget {
   }
 }
 
+// -----  Other widgets  -----
+
+///
+/// A custom painter to draw lines between two positions
 class _LinkPainter extends CustomPainter {
   final Offset start;
   final Offset end;

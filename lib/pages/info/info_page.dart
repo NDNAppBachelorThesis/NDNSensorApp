@@ -3,9 +3,11 @@ import 'package:ndn_sensor_app/constants.dart';
 import 'package:ndn_sensor_app/extensions.dart';
 import 'package:ndn_sensor_app/pages/info/info_list_item.dart';
 import 'package:ndn_sensor_app/widgets/drawer.dart';
-import 'package:ndn_sensor_app/widgets/labeled_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+
+///
+/// The info page, which shows some information about this app
 class InfoPage extends StatefulWidget {
   const InfoPage({super.key});
 
@@ -63,7 +65,7 @@ class _InfoPageState extends State<InfoPage> {
             ),
             Divider(),
             InfoListItem(
-              text: "0.0.1-dev",
+              text: "1.0.0",
               labelText: "Version",
               icon: Icons.update_outlined,
               labelTop: true,

@@ -21,6 +21,9 @@ import java.nio.ByteBuffer
 import java.nio.channels.AsynchronousCloseException
 
 
+/**
+ * Extension function to run tasks asynchronously
+ */
 fun <R> CoroutineScope.executeAsyncTask(task: () -> R) = launch {
     val result = withContext(Dispatchers.IO) {
         // runs in background thread without blocking the Main Thread
@@ -57,7 +60,7 @@ class MainActivity : FlutterActivity() {
 
                 while (!handler.isDone()) {
                     face.processEvents()
-                    Thread.sleep(10)
+                    Thread.sleep(1)
                 }
 
                 if (handler.hadTimeout()) {
@@ -90,6 +93,9 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    /**
+     * This function updates the face instance to reflect the current config.
+     */
     private fun updateFaceInstance() {
         face = if (faceIp.isEmpty() || facePort <= 0) {
             Face()
@@ -98,6 +104,9 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    /**
+     * Is called the the NFD config in the Flutter app was changed.
+     */
     private fun setFaceSettings(call: MethodCall, result: MethodChannel.Result) {
         println("[NDN-ANDROID] Updating face settings")
         faceIp = call.argument<String>("ip") ?: ""
@@ -106,6 +115,9 @@ class MainActivity : FlutterActivity() {
         result.success(null)
     }
 
+    /**
+     * Tries to read a sensor measurement from a specific sensor
+     */
     private fun getData(call: MethodCall, result: MethodChannel.Result) {
         val handler = GetSensorDataHandler()
         val path = call.argument<String>("path")
@@ -116,6 +128,9 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    /**
+     * Sends a auto discovery message
+     */
     private fun runDiscovery(call: MethodCall, result: MethodChannel.Result) {
         println("[NDN-ANDROID] Running discovery")
         val visitedIds = call.argument<List<Long>>("visitedIds")
@@ -130,6 +145,9 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    /**
+     * Tries to get the link qualities from a single device
+     */
     private fun getLinkQuality(call: MethodCall, result: MethodChannel.Result) {
         println("[NDN-ANDROID] Getting Link Quality")
         val deviceId = call.argument<String>("deviceId")
@@ -144,6 +162,7 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         WireFormat.setDefaultWireFormat(Tlv0_3WireFormat.get());
+        // Configure the method channel
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             CHANNEL

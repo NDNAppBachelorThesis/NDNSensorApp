@@ -8,6 +8,8 @@ import 'package:ndn_sensor_app/widgets/drawer.dart';
 import 'package:ndn_sensor_app/widgets/labeled_text.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+///
+/// The basic settings page. Link specific settings pages here
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 

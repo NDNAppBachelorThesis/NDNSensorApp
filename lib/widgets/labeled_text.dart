@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// A text widget, which has a small label above it
+///
+/// A text widget, which has a small label above or below it
 class LabeledText extends StatelessWidget {
   final String text;
   final String labelText;

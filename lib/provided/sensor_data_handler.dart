@@ -6,6 +6,8 @@ import 'package:ndn_sensor_app/provided/configured_sensors.dart';
 import 'package:ndn_sensor_app/provided/ndn_api_wrapper.dart';
 
 
+///
+/// Manages the sensors data. Periodically requests the current sensor measurement values via NDN
 class SensorDataHandler {
   final Map<String, SensorData> _dataHistory = {};
   final ConfiguredSensors _configuredSensors;
@@ -17,6 +19,8 @@ class SensorDataHandler {
     required NDNApiWrapper ndnApiWrapper,
   }) : _configuredSensors = configuredSensors, _ndnApiWrapper = ndnApiWrapper;
 
+  ///
+  /// Request a single measurement via NDN
   Future<void> _updateSingleData(String path) async {
     try {
       var res = await _ndnApiWrapper.getRawData(path);
@@ -30,6 +34,8 @@ class SensorDataHandler {
     }
   }
 
+  ///
+  /// Request the measurements for all active sensors via NDN
   Future<void> _updateAllData(Timer timer) async {
     List<Future<void>> futures = [];
 
@@ -83,6 +89,8 @@ class SensorDataHandler {
   }
 }
 
+///
+/// Stores the actual data history of a sensor
 class SensorData extends ChangeNotifier {
   final List<double> _history = [];
   bool _lastResultError = false;

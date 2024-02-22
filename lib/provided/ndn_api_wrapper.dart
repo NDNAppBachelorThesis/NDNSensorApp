@@ -52,12 +52,18 @@ class NDNUnknownException extends NDNException {
   String toString() => "NDNUnknownException for path $path";
 }
 
+///
+/// A wrapper around the method channel to abstract the method channel code away
 class NDNApiWrapper {
   static const platform = MethodChannel("ndn.matthes.de/jndn");
   final GlobalAppState globalAppState;
 
   NDNApiWrapper({required this.globalAppState});
 
+  ///
+  /// Tries to execute a method channel function and handles possible errors.
+  /// This method is responsible for increasing / resetting the count to failed NDN packets, which eventually leads to
+  /// an error message
   Future<dynamic> _methodChannelCallWrapper(String path, Future<dynamic> Function() request) async {
     try {
       var res = await request();
@@ -81,6 +87,8 @@ class NDNApiWrapper {
     }
   }
 
+  ///
+  /// Returns a sensors measurement
   Future<double> getRawData(String path) async {
     return await _methodChannelCallWrapper(path, () async {
       return platform.invokeMethod("getData", {
@@ -89,6 +97,8 @@ class NDNApiWrapper {
     });
   }
 
+  ///
+  /// Runs the sensor discovery algorithm
   void runNameDiscovery(void Function(List<String> paths, int? deviceId, bool? isNFD, bool finished) onPathsFound) async {
     List<int> visitedIds = [];
     int timeoutCnt = 0;
@@ -115,6 +125,8 @@ class NDNApiWrapper {
     onPathsFound([], null, null, true);
   }
 
+  ///
+  /// Runs the sensor discovery algorithm but returns the found devices and not the sensors
   void runDeviceDiscovery(void Function(String? deviceId, bool? isNfd, bool finished) onDeviceFound) async {
     List<int> visitedIds = [];
     int timeoutCnt = 0;
@@ -140,6 +152,8 @@ class NDNApiWrapper {
     onDeviceFound(null, null, true);
   }
 
+  ///
+  /// Update the NDN face settings
   Future<void> setFaceSettings(String ip, int port) async {
     await _methodChannelCallWrapper("setFaceSettings", () async {
       return await platform.invokeMethod("setFaceSettings", {
@@ -149,6 +163,8 @@ class NDNApiWrapper {
     });
   }
 
+  ///
+  /// Request the link qualities from a device
   Future<Map<int, double>> getSensorLinkQualities(String deviceId) async {
     var r = await _methodChannelCallWrapper("/esp/$deviceId/linkquality", () async {
       return platform.invokeMethod("getLinkQuality", {

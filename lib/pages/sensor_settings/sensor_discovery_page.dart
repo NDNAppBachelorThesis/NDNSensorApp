@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 
 import '../../provided/configured_sensors.dart';
 
+///
+/// Page for the sensor discovery
 class SensorDiscoveryPage extends StatefulWidget {
   const SensorDiscoveryPage({super.key});
 
@@ -104,6 +106,8 @@ class _SensorDiscoveryPageState extends State<SensorDiscoveryPage> {
   }
 }
 
+///
+/// Displays a found sensor
 class _FoundSensorWidget extends StatefulWidget {
   final String path;
   final bool exists;

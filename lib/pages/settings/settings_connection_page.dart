@@ -3,6 +3,9 @@ import 'package:ndn_sensor_app/extensions.dart';
 import 'package:ndn_sensor_app/provided/app_settings.dart';
 import 'package:provider/provider.dart';
 
+///
+/// The specific settings page for the NFD connection.
+/// Configure if you want a direct connection or use the nfd-android app
 class SettingsConnectionPage extends StatefulWidget {
   const SettingsConnectionPage({super.key});
 

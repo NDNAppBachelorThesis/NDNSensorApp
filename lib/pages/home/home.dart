@@ -5,6 +5,8 @@ import 'package:ndn_sensor_app/provided/sensor_data_handler.dart';
 import 'package:ndn_sensor_app/pages/home/sensor_card.dart';
 import 'package:provider/provider.dart';
 
+///
+/// The home page of the app. Shows the the measurements of the configured sensors
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 

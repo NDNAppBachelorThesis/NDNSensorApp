@@ -6,6 +6,10 @@ import net.named_data.jndn.OnData
 import net.named_data.jndn.OnTimeout
 import java.nio.ByteBuffer
 
+/**
+ * This is the most basic Interest handler. It can be extended to process received Data packets from
+ * an NDN Interest packet
+ */
 abstract class InterestHandler : OnData, OnTimeout {
     private var hadTimeout = false
     abstract fun setDone()
@@ -22,6 +26,9 @@ abstract class InterestHandler : OnData, OnTimeout {
         abort();
     }
 
+    /**
+     * Converts the received data to a ByteArray instance
+     */
     protected fun dataToByteArray(data: Data, length: Int, offset: Int): ByteArray {
         if (data.content.buf() == null) {
             return ByteArray(0)
@@ -34,22 +41,34 @@ abstract class InterestHandler : OnData, OnTimeout {
         return ByteArray(length) { data.content.buf()[it + offset] }
     }
 
+    /**
+     * Converts a ByteArray to long
+     */
     protected fun bytesToLong(byteArray: ByteArray): Long {
         return ByteBuffer.wrap(byteArray.reversedArray()).getLong()
     }
 
+    /**
+     * Converts a ByteArray to float
+     */
     protected fun bytesToFloat(byteArray: ByteArray): Float {
         return ByteBuffer.wrap(byteArray.reversedArray()).getFloat()
     }
 
+    /**
+     * Converts a ByteArray to double
+     */
     protected fun bytesToDouble(byteArray: ByteArray): Double {
         return ByteBuffer.wrap(byteArray.reversedArray()).getDouble()
     }
 
 }
 
+/**
+ * A more advanced Interest handler, which also stores weather the request is finished or not
+ */
 abstract class BasicInterestHandler : InterestHandler() {
-    protected var finished = false
+    private var finished = false
 
     override fun setDone() {
         finished = true
@@ -64,6 +83,9 @@ abstract class BasicInterestHandler : InterestHandler() {
     }
 }
 
+/**
+ * The Interest handler for receiving sensor measurements
+ */
 class GetSensorDataHandler : BasicInterestHandler() {
     var data: Double? = null
 
@@ -73,6 +95,9 @@ class GetSensorDataHandler : BasicInterestHandler() {
     }
 }
 
+/**
+ * The Interest handler for receiving auto discovery data
+ */
 class DiscoveryClientHandler : BasicInterestHandler() {
     var responseId: Long? = null
     var responsePaths = mutableListOf<String>()
@@ -98,10 +123,15 @@ class DiscoveryClientHandler : BasicInterestHandler() {
     }
 }
 
+/**
+ * The Interest handler for receiving the link qualities of a device
+ */
 class LinkQualityHandler : BasicInterestHandler() {
     val qualities: MutableMap<Long, Float> = mutableMapOf()
 
     override fun onData(interest: Interest, data: Data) {
+        // Each entry is 12 bytes long. I can use this to determine the amount of entries in
+        // the response
         for (i in 0..<data.content.size() / 12) {
             val id = bytesToLong(dataToByteArray(data, 8, 12 * i + 0))
             val quality = bytesToFloat(dataToByteArray(data, 4, 12 * i + 8));

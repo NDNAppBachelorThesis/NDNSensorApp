@@ -8,6 +8,8 @@ import 'package:ndn_sensor_app/provided/ndn_api_wrapper.dart';
 import 'package:ndn_sensor_app/widgets/text_checkbox.dart';
 import 'package:provider/provider.dart';
 
+///
+/// Shows the bottom sheet, which allows adding a new sensor
 void showSensorAddBottomSheet(BuildContext context, void Function(SensorConfig config) onSensorAdded,
     [String? path]) async {
   showMaterialModalBottomSheet(
@@ -42,6 +44,8 @@ class _SensorAddButtonState extends State<SensorAddButton> {
   }
 }
 
+///
+/// The widget, that is displayed with the showSensorAddBottomSheet() function
 class _AddSensorBottomSheetContent extends StatefulWidget {
   final void Function(SensorConfig config) onSensorAdded;
   final String? defaultPath;
@@ -74,6 +78,8 @@ class _AddSensorBottomSheetContentState extends State<_AddSensorBottomSheetConte
     }
   }
 
+  ///
+  /// Validates the input and shows errors if the input is faulty
   Future<bool> _validateInput() async {
     setState(() => loading = true);
 
@@ -156,6 +162,7 @@ class _AddSensorBottomSheetContentState extends State<_AddSensorBottomSheetConte
         SizedBox(height: 20),
         TextField(
           controller: pathController,
+          onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
           textInputAction: TextInputAction.next,
           decoration: InputDecoration(
             labelText: "NDN Path",
@@ -166,6 +173,7 @@ class _AddSensorBottomSheetContentState extends State<_AddSensorBottomSheetConte
         SizedBox(height: 15),
         TextField(
           controller: titleController,
+          onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
           decoration: InputDecoration(
             labelText: "Name",
             prefixIcon: Icon(Icons.text_snippet_outlined),

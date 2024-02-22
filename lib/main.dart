@@ -1,11 +1,13 @@
-import 'dart:developer';
 import 'dart:ui';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:ndn_sensor_app/extensions.dart';
 import 'package:ndn_sensor_app/pages/home/home.dart';
+import 'package:ndn_sensor_app/pages/settings/settings_connection_page.dart';
 import 'package:ndn_sensor_app/provided/app_settings.dart';
 import 'package:ndn_sensor_app/provided/configured_sensors.dart';
 import 'package:ndn_sensor_app/provided/global_app_state.dart';
@@ -14,10 +16,11 @@ import 'package:ndn_sensor_app/provided/drawer_state_info.dart';
 import 'package:ndn_sensor_app/provided/sensor_data_handler.dart';
 import 'package:ndn_sensor_app/utils.dart';
 import 'package:provider/provider.dart';
-import 'package:logging/logging.dart';
-// import 'package:logging_to_logcat/logging_to_logcat.dart';
 
+final GlobalKey _alertKey = GlobalKey();
 
+///
+/// Stores the generated data after the startup phase
 class StartupData {
   final AppSettings appSettings;
   final NDNApiWrapper ndnApiWrapper;
@@ -25,26 +28,12 @@ class StartupData {
   final SensorDataHandler sensorDataHandler;
   final GlobalAppState globalAppState;
 
-  StartupData(this.appSettings, this.ndnApiWrapper, this.configuredSensors, this.sensorDataHandler, this.globalAppState);
+  StartupData(
+      this.appSettings, this.ndnApiWrapper, this.configuredSensors, this.sensorDataHandler, this.globalAppState);
 }
 
-Future<StartupData> _initializeApp() async {
-  await FlutterDisplayMode.setHighRefreshRate();  // Enable refresh rate of > 60 fps
-  var appState = GlobalAppState();
-  var apiWrapper = NDNApiWrapper(globalAppState: appState);
-  var appSettings = AppSettings(apiWrapper);
-  await appSettings.load();
-  var configuredSensors = ConfiguredSensors();
-  await configuredSensors.initialize();
-  var sensorDataHandler = SensorDataHandler(
-    configuredSensors: configuredSensors,
-    ndnApiWrapper: apiWrapper,
-  );
-  await sensorDataHandler.startAndInitialize();
-
-  return StartupData(appSettings, apiWrapper, configuredSensors, sensorDataHandler, appState);
-}
-
+///
+/// My App widget. It loads the required data and shows the main apps widget if successful
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -54,6 +43,24 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late final Future<StartupData> _startupFuture;
+
+  /// Loads the required data for the app to start
+  Future<StartupData> _initializeApp() async {
+    await FlutterDisplayMode.setHighRefreshRate(); // Enable refresh rate of > 60 fps
+    var appState = GlobalAppState();
+    var apiWrapper = NDNApiWrapper(globalAppState: appState);
+    var appSettings = AppSettings(apiWrapper);
+    await appSettings.load();
+    var configuredSensors = ConfiguredSensors();
+    await configuredSensors.initialize();
+    var sensorDataHandler = SensorDataHandler(
+      configuredSensors: configuredSensors,
+      ndnApiWrapper: apiWrapper,
+    );
+    await sensorDataHandler.startAndInitialize();
+
+    return StartupData(appSettings, apiWrapper, configuredSensors, sensorDataHandler, appState);
+  }
 
   @override
   void initState() {
@@ -180,19 +187,87 @@ class _ErrorApp extends StatelessWidget {
   }
 }
 
+///
+/// Shows the initial setup widget
+class _InitialSetupAlertWidget extends StatelessWidget {
+  final Widget child;
+
+  const _InitialSetupAlertWidget({required this.child, super.key});
+
+  void _showSetupMessage(BuildContext context, AppSettings appSettings) async {
+    var textStyle = Theme.of(context).textTheme.bodyMedium;
+
+    // Close existing popup
+    if (_alertKey.currentContext != null) {
+      Navigator.of(context).pop();
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        key: _alertKey,
+        icon: Icons.info.toIcon(size: 30),
+        title: Text("Welcome to my App"),
+        content: IntrinsicHeight(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RichText(
+                text: TextSpan(children: [
+                  TextSpan(text: "To be able to start using this App, you need to go to ", style: textStyle),
+                  TextSpan(
+                    text: "Menu > Settings > NFD Connection",
+                    style: textStyle?.copyWith(color: Colors.blue.shade800),
+                    recognizer: TapGestureRecognizer()..onTap = () async {
+                      Navigator.of(context).pop();  // Close dialog
+                      push(Navigator.of(context), (context) => SettingsConnectionPage());
+                      appSettings.initiallyConfigured = true;
+                      await appSettings.save();
+                    }
+                  ),
+                  TextSpan(text: " and configure the connection to the NFD. Afterwards you are ready to go!", style: textStyle),
+                ]),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(onPressed: () => Navigator.of(context).pop(), child: Text("Okay")),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var appSettings = context.read<AppSettings>();
+
+    if (!appSettings.initiallyConfigured) {
+      SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+        _showSetupMessage(context, appSettings);
+      });
+    }
+
+    return child;
+  }
+}
+
 class _MainApp extends StatelessWidget {
   final ColorScheme colorScheme;
 
   const _MainApp({required this.colorScheme, super.key});
 
   TextStyle _buildTextStyle(
-      double fontSize,
-      double lineHeight,
-      ColorScheme colorScheme, {
-        Color? color,
-        double opacity = 1.0,
-        FontWeight? weight,
-      }) {
+    double fontSize,
+    double lineHeight,
+    ColorScheme colorScheme, {
+    Color? color,
+    double opacity = 1.0,
+    FontWeight? weight,
+  }) {
     var baseColor = color ?? colorScheme.onSurfaceVariant;
     var fontColor = Color.alphaBlend(baseColor.withOpacity(opacity), colorScheme.surface);
 
@@ -223,8 +298,7 @@ class _MainApp extends StatelessWidget {
           bodySmall: _buildTextStyle(15, 0, colorScheme),
           labelLarge: _buildTextStyle(17, 0, colorScheme),
           labelMedium: _buildTextStyle(16, 0, colorScheme, opacity: 0.6, weight: FontWeight.w600),
-          labelSmall:
-          _buildTextStyle(13, 0, colorScheme, opacity: 0.6, weight: FontWeight.normal), // Done
+          labelSmall: _buildTextStyle(13, 0, colorScheme, opacity: 0.6, weight: FontWeight.normal), // Done
         ),
         iconTheme: IconThemeData(
           color: colorScheme.onSurfaceVariant,
@@ -244,7 +318,8 @@ class _MainApp extends StatelessWidget {
           ),
         )),
       ),
-      home: NFDConnectionErrorPageWrapper(child: HomePage()),
+      // Must initially wrap the HomePage in the NFDConnectionErrorPageWrapper so it can display the alert widget
+      home: _InitialSetupAlertWidget(child: NFDConnectionErrorPageWrapper(child: HomePage())),
     );
   }
 }

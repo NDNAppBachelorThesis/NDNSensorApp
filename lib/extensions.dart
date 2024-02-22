@@ -30,6 +30,7 @@ extension DoubleListUtil on List<double> {
     return res / divider;
   }
 
+  /// Averages every n elements in the list
   List<double> averageNElements(int n) {
     assert(n % 2 == 1); // Must be odd number
     var thisList = this;

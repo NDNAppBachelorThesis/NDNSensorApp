@@ -44,3 +44,5 @@ pubspec.lock
 /android/app/profile
 /android/app/release
 
+# Custom files
+testing*.dart

@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:ndn_sensor_app/pages/debug_page.dart';
 import 'package:ndn_sensor_app/pages/home/home.dart';
 import 'package:ndn_sensor_app/pages/info/info_page.dart';
-import 'package:ndn_sensor_app/pages/link_quality/LinkQualityPage.dart';
+import 'package:ndn_sensor_app/pages/link_quality/link_quality_page.dart';
 import 'package:ndn_sensor_app/pages/sensor_settings/sensor_settings.dart';
 import 'package:ndn_sensor_app/pages/settings/settings_page.dart';
 import 'package:ndn_sensor_app/provided/drawer_state_info.dart';
 import 'package:ndn_sensor_app/utils.dart';
 import 'package:provider/provider.dart';
 
+/// The drawer widget with all entries and navigation options
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
@@ -90,6 +91,7 @@ class AppDrawer extends StatelessWidget {
   }
 }
 
+/// An entry in the drawer
 class _DrawerItem extends StatelessWidget {
   final String text;
   final IconData activeIcon;

@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+///
+/// The unit of a sensors measurements
 enum SensorUnit {
   none(Icons.question_mark_rounded, ""),
   temperature(Icons.thermostat_rounded, "°C"),
@@ -26,6 +28,9 @@ enum SensorUnit {
   }
 }
 
+
+///
+/// Stores and manages the currently configured sensors. Also ensures that these settings are persisted to disk
 class ConfiguredSensors with ChangeNotifier {
   List<SensorConfig> _selectedEndpoints = [];
 
@@ -42,6 +47,8 @@ class ConfiguredSensors with ChangeNotifier {
     notifyListeners();
   }
 
+  ///
+  /// Add a new sensor
   Future<void> addEndpoint(SensorConfig config) async {
     var prefs = await SharedPreferences.getInstance();
 
@@ -51,6 +58,8 @@ class ConfiguredSensors with ChangeNotifier {
     notifyListeners();
   }
 
+  ///
+  /// Remove an existing sensor
   Future<void> removeEndpoint(String path) async {
     var prefs = await SharedPreferences.getInstance();
 
@@ -60,6 +69,8 @@ class ConfiguredSensors with ChangeNotifier {
     notifyListeners();
   }
 
+  ///
+  /// Enable / disable an existing sensor
   Future<void> toggleEndpoint(String path, bool enabled) async {
     var prefs = await SharedPreferences.getInstance();
 
@@ -70,6 +81,8 @@ class ConfiguredSensors with ChangeNotifier {
     notifyListeners();
   }
 
+  ///
+  /// Checks if a sensor with a certain name exists (e.g. '/etc/654461481157345/data')
   bool pathExists(String path) {
     return _selectedEndpoints.map((e) => e.path).contains(path);
   }
@@ -79,6 +92,8 @@ class ConfiguredSensors with ChangeNotifier {
   List<SensorConfig> get activeEndpoints => _selectedEndpoints.where((e) => e.enabled).toList(growable: false);
 }
 
+///
+/// The concrete config of a single sensor
 class SensorConfig {
   final String path;
   final String title;

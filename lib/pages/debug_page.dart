@@ -3,6 +3,8 @@ import 'package:ndn_sensor_app/provided/ndn_api_wrapper.dart';
 import 'package:ndn_sensor_app/widgets/drawer.dart';
 import 'package:provider/provider.dart';
 
+///
+/// For debugging only. Not shown in release builds
 class DebugPage extends StatefulWidget {
   const DebugPage({super.key});
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+///
+/// Stores global app state, which can be used everywhere in the app
 class GlobalAppState with ChangeNotifier {
   bool _showedNDFConnectionError = false;
   int _unsuccessfulPacketsCnt = 0;
@@ -13,6 +15,8 @@ class GlobalAppState with ChangeNotifier {
 
   int get unsuccessfulPacketsCnt => _unsuccessfulPacketsCnt;
 
+  ///
+  /// Increments the counter for unsuccessfully send NDN packets
   int incrementUnsuccessfulPacketsCnt() {
     var res =  ++_unsuccessfulPacketsCnt;
     notifyListeners();

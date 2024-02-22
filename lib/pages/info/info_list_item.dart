@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:ndn_sensor_app/extensions.dart';
 
-
+///
+/// A list element for the InfoPage widget.
+/// Simplifies the layout with text, label and icon
 class InfoListItem extends StatelessWidget {
   final String text;
   final Color? textColor;

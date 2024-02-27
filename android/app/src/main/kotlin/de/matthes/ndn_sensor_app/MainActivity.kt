@@ -154,7 +154,7 @@ class MainActivity : FlutterActivity() {
         val handler = LinkQualityHandler()
         val name = Name("/esp/$deviceId/linkquality")
 
-        executeNDNCall(handler, name, result, timeout = 1000.0) {
+        executeNDNCall(handler, name, result, timeout = 5000.0) {
             result.success(handler.qualities.toMap())
         }
     }

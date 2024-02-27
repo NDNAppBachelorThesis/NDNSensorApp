@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:ndn_sensor_app/provided/ndn_api_wrapper.dart';
@@ -9,12 +11,13 @@ import 'package:zoom_widget/zoom_widget.dart';
 /// For now this is there the positions of the ESP32 boards are configured
 const devicePositionLookup = {
   // NFDs
+  "1": (0.18922539658771828, 0.49491724484244753),
   "123": (0.18922539658771828, 0.49491724484244753),
   // Devices
-  "198328652539720": (0.8706381641558737, 0.4158521646138516),  // Board 8
-  "233585120353436": (0.6089442026508508, 0.9095065773387448),  // Board 2
-  "251117176855708": (0.6259425888792238, 0.1940290478752015),  // Board 4
-  "92843337030812": (0.8399677245826812, 0.8755098048804338),   // Board 1
+  "198328652539720": (0.8706381641558737, 0.4158521646138516), // Board 8
+  "233585120353436": (0.6089442026508508, 0.9095065773387448), // Board 2
+  "251117176855708": (0.6259425888792238, 0.1940290478752015), // Board 4
+  "92843337030812": (0.8399677245826812, 0.8755098048804338), // Board 1
 };
 
 ///
@@ -28,6 +31,7 @@ class LinkQualityPage extends StatefulWidget {
 
 class _LinkQualityPageState extends State<LinkQualityPage> {
   late final Future<Map<String, DeviceInfo>> future;
+  var foundSensorsCnt = -1; // -1 = state discovery, otherwise state finding values
 
   ///
   /// Loads the link quality in three steps.
@@ -51,6 +55,8 @@ class _LinkQualityPageState extends State<LinkQualityPage> {
     while (doRun) {
       await Future.delayed(Duration(milliseconds: 10));
     }
+
+    setState(() => foundSensorsCnt = resultCache.length);
 
     Map<String, DeviceInfo> result = {};
     for (var element in resultCache) {
@@ -95,7 +101,7 @@ class _LinkQualityPageState extends State<LinkQualityPage> {
             if (snapshot.hasError) {
               return Text("Error: ${snapshot.error}");
             } else if (!snapshot.hasData) {
-              return _Loading();
+              return _Loading(foundSensorsCnt: foundSensorsCnt);
             }
 
             var data = snapshot.data!;
@@ -110,7 +116,8 @@ class _LinkQualityPageState extends State<LinkQualityPage> {
 ///
 /// The loading widget
 class _Loading extends StatelessWidget {
-  const _Loading({super.key});
+  final int foundSensorsCnt;
+  const _Loading({required this.foundSensorsCnt, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +125,13 @@ class _Loading extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Searching for available sensors..."),
+          if (foundSensorsCnt < 0) ...[
+            Text("Searching for available sensors..."),
+          ],
+          if (foundSensorsCnt >= 0) ...[
+            Text("Found $foundSensorsCnt sensors."),
+            Text("Aggregating their link qualities..."),
+          ],
           SizedBox(height: 20),
           CircularProgressIndicator(),
         ],
@@ -164,12 +177,10 @@ class _LinkQualityState extends State<_LinkQuality> {
 
     var imgX = imageSize.width;
     var imgY = imageSize.height;
+    var rnd = Random(32269420);
 
     widget.availableDevices.forEach((deviceId, deviceInfo) {
-      var position = devicePositionLookup[deviceId];
-      if (position == null) {
-        return;
-      }
+      var position = devicePositionLookup[deviceId] ?? (0.2 + rnd.nextDouble() / 10, 0.2 + rnd.nextDouble() / 10);
 
       deviceInfo.x = imgX * position.$1;
       deviceInfo.y = imgY * position.$2;
@@ -252,8 +263,12 @@ class _LinkQualityState extends State<_LinkQuality> {
             return;
           }
 
-          res.add(
-              LinkLineInfo(deviceInfo, devices[dstId]!, linkQualities[srcId]![dstId]!, linkQualities[dstId]![srcId]!));
+          res.add(LinkLineInfo(
+            deviceInfo,
+            devices[dstId]!,
+            linkQualities[srcId]![dstId]!,
+            linkQualities[dstId]![srcId]!,
+          ));
         } on Error {
           // Catch "! on null value" error
           print("NullError: $srcId, $dstId");

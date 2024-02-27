@@ -25,11 +25,23 @@ class _SettingsConnectionPageState extends State<SettingsConnectionPage> {
     appSettings.remoteNfdPort = int.tryParse(remoteNfdPortController.text) ?? 0;
     appSettings.save();
 
+    var sb = SnackBar(
+      elevation: 5,
+      behavior: SnackBarBehavior.floating,
+      content: Row(
+        children: [
+          Icons.update.toIcon(size: 30, color: Colors.white),
+          SizedBox(width: 20),
+          Flexible(child: Text("Update successfull.\n(Re-)connected to NDN!")),
+        ],
+      ),
+    );
+
     if (context.mounted) {
       Navigator.of(context).pop();
+      ScaffoldMessenger.of(context)..clearSnackBars()..showSnackBar(sb);
     }
   }
-
 
   @override
   void didChangeDependencies() {
@@ -113,24 +125,26 @@ class _SettingsConnectionPageState extends State<SettingsConnectionPage> {
                     controller: remoteNfdPortController,
                     enabled: !useNfd,
                     decoration: InputDecoration(
-                      labelText: "Port",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.only(
-                          topRight: borderRadius,
-                          bottomRight: borderRadius,
-                        ),
-                      )
-                    ),
+                        labelText: "Port",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.only(
+                            topRight: borderRadius,
+                            bottomRight: borderRadius,
+                          ),
+                        )),
                     keyboardType: TextInputType.number,
                   ),
                 )
               ],
             ),
             SizedBox(height: 30),
-            Center(child: ElevatedButton(onPressed: _saveSettings, child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: Text("Save", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            ))),
+            Center(
+                child: ElevatedButton(
+                    onPressed: _saveSettings,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Text("Save", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    ))),
             SizedBox(height: 50),
           ],
         ),

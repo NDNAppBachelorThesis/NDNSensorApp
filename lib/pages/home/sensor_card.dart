@@ -37,7 +37,7 @@ class _SensorCardState extends State<SensorCard> {
     var relevantHistory = history.lastNElements(15).map((e) => e.roundToN(2)).toList();
     var intervalY = 5.0;
     if (relevantHistory.isNotEmpty) {
-      intervalY = (relevantHistory.reduce((a, b) => max(a, b)) / 8).roundToDouble();
+      intervalY = max(5, (relevantHistory.reduce((a, b) => max(a, b)) / 8).roundToDouble());
     }
     var minY = 0.0;
     var maxY = 30.0;

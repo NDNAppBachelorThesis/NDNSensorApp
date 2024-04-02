@@ -23,6 +23,7 @@ class _SettingsConnectionPageState extends State<SettingsConnectionPage> {
     appSettings.useNfd = useNfd;
     appSettings.remoteNfdIp = remoteNfdIpController.text;
     appSettings.remoteNfdPort = int.tryParse(remoteNfdPortController.text) ?? 0;
+    appSettings.initiallyConfigured = true;
     appSettings.save();
 
     var sb = SnackBar(
